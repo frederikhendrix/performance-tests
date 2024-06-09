@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: "14"
 
       - name: Install dependencies
         run: npm install
@@ -29,7 +29,9 @@ jobs:
         run: |
           echo $FIREBASE_SERVICE_ACCOUNT_BASE64 | base64 --decode > service-account-file.json
 
-      - name: Set up Firebase Admin SDK
+      - name: Generate JWT Token
+        env:
+          USER_ROLE: ${{ secrets.USER_ROLE }}
         run: node generateToken.js
         id: generate-token
 
@@ -40,12 +42,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up K6
-        uses: grafana/setup-k6@v2
+      - name: Install K6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y k6
 
-      - name: Run K6 Tests
+      - name: Run K6 Response Time Test
         env:
           API_URL: ${{ secrets.API_URL }}
           USER_ROLE: ${{ secrets.USER_ROLE }}
           JWT_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: k6 run k6/scripts/response-time-test.js
+
+      - name: Run K6 Stress Test
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          USER_ROLE: ${{ secrets.USER_ROLE }}
+          JWT_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: k6 run k6/scripts/stress-test.js
