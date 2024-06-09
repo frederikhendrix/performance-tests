@@ -1,0 +1,51 @@
+name: Performance Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  generate-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Decode Base64 and Set Firebase Service Account
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+        run: |
+          echo $FIREBASE_SERVICE_ACCOUNT_BASE64 | base64 --decode > service-account-file.json
+
+      - name: Set up Firebase Admin SDK
+        run: node generateToken.js
+        id: generate-token
+
+  run-k6-tests:
+    needs: generate-token
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up K6
+        uses: grafana/setup-k6@v2
+
+      - name: Run K6 Tests
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          USER_ROLE: ${{ secrets.USER_ROLE }}
+          JWT_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: k6 run k6/scripts/response-time-test.js
