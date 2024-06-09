@@ -9,34 +9,7 @@ on:
       - main
 
 jobs:
-  generate-token:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Decode Base64 and Set Firebase Service Account
-        env:
-          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
-        run: |
-          echo $FIREBASE_SERVICE_ACCOUNT_BASE64 | base64 --decode > service-account-file.json
-
-      - name: Generate JWT Token
-        env:
-          USER_ROLE: ${{ secrets.USER_ROLE }}
-        run: node generateToken.js
-        id: generate-token
-
   run-k6-tests:
-    needs: generate-token
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -56,12 +29,12 @@ jobs:
         env:
           API_URL: ${{ secrets.API_URL }}
           USER_ROLE: ${{ secrets.USER_ROLE }}
-          JWT_TOKEN: ${{ steps.generate-token.outputs.token }}
+          JWT_TOKEN: ${{ secrets.JWT_TOKEN }}
         run: k6 run k6/scripts/response-time-test.js
 
       - name: Run K6 Stress Test
         env:
           API_URL: ${{ secrets.API_URL }}
           USER_ROLE: ${{ secrets.USER_ROLE }}
-          JWT_TOKEN: ${{ steps.generate-token.outputs.token }}
+          JWT_TOKEN: ${{ secrets.JWT_TOKEN }}
         run: k6 run k6/scripts/stress-test.js
