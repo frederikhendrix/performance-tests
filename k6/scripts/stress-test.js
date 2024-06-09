@@ -7,10 +7,10 @@ const apiUrl = __ENV.API_URL;
 
 export let options = {
   stages: [
-    { duration: "1m", target: 25 }, // Ramp-up to 25 users over 1 minute
-    { duration: "1.5m", target: 50 }, // Ramp-up to 50 users over 1.5 minutes
-    { duration: "2.5m", target: 100 }, // Ramp-up to 100 users over 2.5 minutes
-    { duration: "2.5m", target: 100 }, // Stay at 100 users for 2.5 minutes
+    { duration: "1m", target: 100 }, // Ramp-up to 25 users over 1 minute
+    { duration: "1.5m", target: 500 }, // Ramp-up to 50 users over 1.5 minutes
+    { duration: "2.5m", target: 1000 }, // Ramp-up to 100 users over 2.5 minutes
+    { duration: "2.5m", target: 1000 }, // Stay at 100 users for 2.5 minutes
     { duration: "1m", target: 0 }, // Ramp-down to 0 users over 1 minute
   ],
   thresholds: {
