@@ -18,8 +18,10 @@ export let options = {
   },
 };
 
+console.log("Running file");
+
 export default function () {
-  let res = http.get(`${apiUrl}/get/videometa`, {
+  let res = http.get(`http://98.64.211.187/get/videometa`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
