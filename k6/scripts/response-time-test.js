@@ -17,7 +17,7 @@ export let options = {
 };
 
 export default function () {
-  let res = http.get(`${apiUrl}/blob/videoName`, {
+  let res = http.get(`${apiUrl}/get/videometa`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
