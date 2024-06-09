@@ -1,0 +1,15 @@
+{
+  "name": "performance-tests",
+  "version": "1.0.0",
+  "description": "Repository for Performance Tests on interactiveflix-cluster",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^12.1.1"
+  }
+}
