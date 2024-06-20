@@ -37,4 +37,5 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           USER_ROLE: ${{ secrets.USER_ROLE }}
           JWT_TOKEN: ${{ secrets.JWT_TOKEN }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
         run: k6 run k6/scripts/normal-user-flow-vu-test.js
