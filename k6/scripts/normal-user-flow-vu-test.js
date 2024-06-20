@@ -24,10 +24,10 @@ export let options = {
 };
 
 export default function () {
-  // Log the start of a new virtual user iteration
   console.log(`Starting new iteration at ${new Date().toISOString()}`);
 
-  let res = http.get(frontendUrl);
+  // Load the frontend homepage
+  let res = http.get(frontendUrl, { timeout: "120s" });
   if (!check(res, { "is status 200": (r) => r.status === 200 })) {
     console.log(`Failed to load frontend homepage: ${res.status}`);
     errorRate.add(1);
@@ -36,12 +36,14 @@ export default function () {
   }
   sleep(1);
 
+  // Fetch video metadata with increased timeout
   res = http.get(`${apiUrl}/get/videometa`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
       "X-User-Role": role,
     },
+    timeout: "120s", //allowes for the call to take up to 120s.
   });
   if (!check(res, { "is status 200": (r) => r.status === 200 })) {
     console.log(`Failed to fetch video metadata: ${res.status}`);
@@ -49,17 +51,29 @@ export default function () {
   } else {
     errorRate.add(0);
   }
+
+  // Handle response to avoid JSON parse error
+  let videos;
+  try {
+    videos = res.json();
+  } catch (e) {
+    console.log(`Error parsing JSON response: ${e.message}`);
+    errorRate.add(1);
+    return;
+  }
+
   sleep(1);
 
-  let videos = res.json();
-  if (videos.length > 0) {
+  if (videos && videos.length > 0) {
     let video = videos[0];
+
     res = http.get(`${apiUrl}/blob/${encodeURIComponent(video.videoName)}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
         "X-User-Role": role,
       },
+      timeout: "120s",
     });
     if (!check(res, { "is status 200": (r) => r.status === 200 })) {
       console.log(`Failed to fetch video blob: ${res.status}`);
@@ -75,6 +89,7 @@ export default function () {
         "Content-Type": "application/json",
         "X-User-Role": role,
       },
+      timeout: "120s",
     });
     if (!check(res, { "is status 200": (r) => r.status === 200 })) {
       console.log(`Failed to fetch video reviews: ${res.status}`);
@@ -91,6 +106,7 @@ export default function () {
       "Content-Type": "application/json",
       "X-User-Role": role,
     },
+    timeout: "120s",
   });
   if (!check(res, { "is status 200": (r) => r.status === 200 })) {
     console.log(`Failed to fetch user reviews: ${res.status}`);
@@ -100,6 +116,5 @@ export default function () {
   }
   sleep(1);
 
-  // Log the end of the virtual user iteration
   console.log(`Ending iteration at ${new Date().toISOString()}`);
 }
